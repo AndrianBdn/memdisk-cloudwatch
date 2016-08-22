@@ -2,7 +2,8 @@
 set -e
 
 NAME=memdisk-cloudwatch
-BIN_URL=https://github.com/AndrianBdn/memdisk-cloudwatch/releases/download/v0.9.2/memdisk-cloudwatch-x86_64.gz
+VERSION=v0.9.2
+BIN_URL=https://github.com/AndrianBdn/memdisk-cloudwatch/releases/download/$VERSION/memdisk-cloudwatch-x86_64.gz
 BIN_PATH=/usr/local/bin/$NAME
 TMP_BIN=/tmp/$NAME
 
@@ -27,4 +28,6 @@ crontab -l | grep -v $NAME > $TMPCRON || true
 echo "*/5 * * * * /usr/local/bin/$NAME -crontab 1" >> $TMPCRON
 cat $TMPCRON | crontab - 
 rm -f $TMPCRON
+
+touch /root/.memdisk-cloudwatch-$VERSION
 
