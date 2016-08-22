@@ -26,7 +26,7 @@ There is no other configuration. Namespace is `System/Linux`, default metric nam
 
 See [install_systemd.sh](install_systemd.sh) and [install_sysv.sh](install_sysv.sh)
 
-It is considered to be bad from security point of view to run them as: 
+It is considered to be insecure to run them as: 
 
 ```sh 
 curl -L https://raw.githubusercontent.com/AndrianBdn/memdisk-cloudwatch/master/install_systemd.sh | sh 

@@ -15,6 +15,7 @@ if ! $TMP_BIN -runonce 1
 then
     echo "got error when trying memdisk-cloudwatch"
     echo "not continuing to install"
+    exit 1
 fi
 set -e
 
