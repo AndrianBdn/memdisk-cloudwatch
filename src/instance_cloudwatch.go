@@ -53,7 +53,7 @@ func (a *instanceCloudwatch) prefill(blockDevice, mountPath string) {
 
 	a.diskDimentions = append(a.diskDimentions, instanceId)
 	a.diskDimentions = append(a.diskDimentions, &cloudwatch.Dimension{
-		Name:  aws.String("FileSystem"),
+		Name:  aws.String("Filesystem"),
 		Value: aws.String(blockDevice),
 	})
 	a.diskDimentions = append(a.diskDimentions, &cloudwatch.Dimension{

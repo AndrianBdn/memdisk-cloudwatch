@@ -22,3 +22,18 @@ The program only reports **MemoryUtilization** (percentage) and **DiskSpaceUtili
 There is no other configuration. Namespace is `System/Linux`, default metric names and units are the same as
  CloudWatchClient.pm / mon-put-instance-data.pl.
  
+## Installation 
+
+See [install_systemd.sh](install_systemd.sh) and [install_sysv.sh](install_sysv.sh)
+
+It is considered to be bad from security point of view to run them as: 
+
+```sh 
+curl -L https://raw.githubusercontent.com/AndrianBdn/memdisk-cloudwatch/master/install_systemd.sh | sh 
+```
+
+or 
+
+```sh 
+curl -L https://raw.githubusercontent.com/AndrianBdn/memdisk-cloudwatch/master/install_sysv.sh | sh 
+```

@@ -8,15 +8,23 @@ import (
 	"os"
 	"time"
 	"math"
+	"math/rand"
 )
 
 func main() {
-	crontabPtr := flag.Bool("crontab", false, "run from cron (by default is off, run as foreground service with 5 min timer)")
+	crontabPtr := flag.Bool("crontab", false, "run from cron, with random 0..20 delay (by default is off, run as foreground service with 5 min timer)")
+	runoncePtr := flag.Bool("runonce", false, "like 'crontab' but without delay")
 	flag.Parse()
+
+	runonce := *runoncePtr || *crontabPtr
+
+	if *crontabPtr {
+		time.Sleep(time.Duration(rand.Intn(20)) * time.Second);
+	}
 
 	icw := NewInstanceCloudwatch(fsDeviceForMountPath("/"), "/")
 	reportMetricsOnce(icw)
-	if !*crontabPtr {
+	if !runonce {
 		startFiveMinuteTicker(icw)
 		select {}
 	}
