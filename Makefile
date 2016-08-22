@@ -17,7 +17,7 @@ docker_debug:
            awsinstancedata-build \
            bash
 
-release:
+release: all 
 	cd binary && cp memdisk-cloudwatch memdisk-cloudwatch-x86_64 && gzip -9 memdisk-cloudwatch-x86_64
 
 clean: 
