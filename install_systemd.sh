@@ -31,7 +31,8 @@ Description=memdisk-cloudwatch: reporting mem&disk to cloudwatch
 Environment=HOME=/root
 ; HOME environment is needed when AWS credentials are stored in /root/.aws/credentials file 
 ExecStart=/usr/local/bin/memdisk-cloudwatch
-Restart=on-abort
+Restart=on-failure
+RestartSec=300
 
 [Install]
 WantedBy=multi-user.target
