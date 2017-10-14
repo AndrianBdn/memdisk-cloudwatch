@@ -97,8 +97,8 @@ func (a *instanceCloudwatch) addMemoryMetric(name, unit string, value float64) {
 }
 
 
-func (a *instanceCloudwatch) AddMemoryMegabytes(name string, gigabytes float64) {
-	a.addMemoryMetric(name, "Megabytes", gigabytes);
+func (a *instanceCloudwatch) AddMemoryMegabytes(name string, megabytes float64) {
+	a.addMemoryMetric(name, "Megabytes", megabytes);
 }
 
 
