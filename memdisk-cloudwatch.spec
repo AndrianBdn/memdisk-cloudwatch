@@ -9,7 +9,7 @@ Summary:        Monitoring Memory and Disk Metrics for Amazon EC2 Linux Instance
 Group:          Development/Tools
 License:        MIT
 URL:            https://github.com/AndrianBdn/memdisk-cloudwatch/
-Source0:        https://github.com/AndrianBdn/memdisk-cloudwatch/releases/download/v%{version}/%{name}-x86_64.gz
+Source0:        %{name}
 Source1:        %{name}.service
 BuildArch:      x86_64
 BuildRequires:  systemd
@@ -36,10 +36,7 @@ CentOS 6.x
 %build
 
 %install
-%{__mkdir} -p %{buildroot}%{_bindir}
-%{__gzip} -d -c %SOURCE0 > %{buildroot}%{_bindir}/%{name}
-%{__chmod} 0755 %{buildroot}%{_bindir}/%{name}
-
+%{__install} -p -m 0755 -D %{SOURCE0} %{buildroot}%{_bindir}/%{name}
 %{__install} -p -m 0644 -D %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
 
 %post
