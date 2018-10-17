@@ -26,10 +26,10 @@ clean:
 docker-clean:
 	docker rmi memdisk-cloudwatch-build
 
-get-sources: memdisk-cloudwatch.spec memdisk-cloudwatch.service
+rpm-get-sources: memdisk-cloudwatch.spec memdisk-cloudwatch.service
 	rpmdev-setuptree
 	spectool --get-files --sourcedir $<
 	cp memdisk-cloudwatch.service $(shell rpm --eval "%{_sourcedir}")
 
-rpm: memdisk-cloudwatch.spec get-sources
+rpm: memdisk-cloudwatch.spec rpm-get-sources
 	rpmbuild -ba $(RPMBUILD_FLAGS) $<
