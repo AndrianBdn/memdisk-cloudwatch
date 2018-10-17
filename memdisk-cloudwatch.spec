@@ -10,7 +10,9 @@ Group:          Development/Tools
 License:        MIT
 URL:            https://github.com/AndrianBdn/memdisk-cloudwatch/
 Source0:        https://github.com/AndrianBdn/memdisk-cloudwatch/releases/download/v%{version}/%{name}-x86_64.gz
+Source1:        %{name}.service
 BuildArch:      x86_64
+BuildRequires:  systemd
 
 %description
 This is the replacement for example CloudWatch scripts by Amazon
@@ -38,12 +40,24 @@ CentOS 6.x
 %{__gzip} -d -c %SOURCE0 > %{buildroot}%{_bindir}/%{name}
 %{__chmod} 0755 %{buildroot}%{_bindir}/%{name}
 
+%{__install} -p -m 0644 -D %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
+
+%post
+%systemd_post %{name}.service
+
+%preun
+%systemd_preun %{name}.service
+
+%postun
+%systemd_postun_with_restart %{name}.service
+
 %clean
 rm -rf %{buildroot}
 
 %files
-%attr(0755,root,root)
+%defattr(-,root,root,-)
 %{_bindir}/%{name}
+%{_unitdir}/%{name}.service
 
 %changelog
 * Wed Oct 17 2018 Evan Zacks <zackse@gmail.com> 0.9.2-1
