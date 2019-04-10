@@ -1,20 +1,22 @@
 package main
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"log"
-	"github.com/aws/aws-sdk-go/service/cloudwatch"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudwatch"
 )
 
 type instanceCloudwatch struct {
-	cloudwatch 			*cloudwatch.CloudWatch
-	instanceIdentity 	ec2metadata.EC2InstanceIdentityDocument
-	memDimensions 		[]*cloudwatch.Dimension
-	diskDimentions 		[]*cloudwatch.Dimension
-	metrics 			[]*cloudwatch.MetricDatum
+	cloudwatch       *cloudwatch.CloudWatch
+	instansDimention *cloudwatch.Dimension
+	instanceIdentity ec2metadata.EC2InstanceIdentityDocument
+	memDimensions    []*cloudwatch.Dimension
+	diskDimentions   []*cloudwatch.Dimension
+	metrics          []*cloudwatch.MetricDatum
 }
 
 const CLOUDWATCH_NAMESPACE string = "System/Linux"
@@ -32,9 +34,8 @@ func NewInstanceCloudwatch(blockDevice, mountPath string) *instanceCloudwatch {
 	cwSess := session.New(&aws.Config{Region: aws.String(instanceIdentity.Region)})
 
 	retval := &instanceCloudwatch{
-		cloudwatch: cloudwatch.New(cwSess),
+		cloudwatch:       cloudwatch.New(cwSess),
 		instanceIdentity: instanceIdentity,
-
 	}
 
 	retval.prefill(blockDevice, mountPath)
@@ -44,14 +45,13 @@ func NewInstanceCloudwatch(blockDevice, mountPath string) *instanceCloudwatch {
 
 func (a *instanceCloudwatch) prefill(blockDevice, mountPath string) {
 
-	instanceId := &cloudwatch.Dimension{
+	a.instansDimention = &cloudwatch.Dimension{
 		Name:  aws.String("InstanceId"),
 		Value: aws.String(a.instanceIdentity.InstanceID),
 	}
 
-	a.memDimensions = append(a.memDimensions, instanceId)
-
-	a.diskDimentions = append(a.diskDimentions, instanceId)
+	a.memDimensions = append(a.memDimensions, a.instansDimention)
+	a.diskDimentions = append(a.diskDimentions, a.instansDimention)
 	a.diskDimentions = append(a.diskDimentions, &cloudwatch.Dimension{
 		Name:  aws.String("Filesystem"),
 		Value: aws.String(blockDevice),
@@ -78,14 +78,12 @@ func (a *instanceCloudwatch) addDiskMetric(name, unit string, value float64) {
 }
 
 func (a *instanceCloudwatch) AddDiskGigabytes(name string, gigabytes float64) {
-	a.addDiskMetric(name, "Gigabytes", gigabytes);
+	a.addDiskMetric(name, "Gigabytes", gigabytes)
 }
 
 func (a *instanceCloudwatch) AddDiskPercent(name string, percent float64) {
-	a.addDiskMetric(name, "Percent", percent);
+	a.addDiskMetric(name, "Percent", percent)
 }
-
-
 
 func (a *instanceCloudwatch) addMemoryMetric(name, unit string, value float64) {
 	a.metrics = append(a.metrics, &cloudwatch.MetricDatum{
@@ -96,20 +94,47 @@ func (a *instanceCloudwatch) addMemoryMetric(name, unit string, value float64) {
 	})
 }
 
+func (a *instanceCloudwatch) AddContainerMetric(name string, value int) {
+	dimensions := []*cloudwatch.Dimension{
+		a.instansDimention,
+		&cloudwatch.Dimension{
+			Name:  aws.String("ContainerName"),
+			Value: aws.String(name),
+		},
+	}
+
+	a.metrics = append(a.metrics, &cloudwatch.MetricDatum{
+		MetricName: aws.String("ContainerStatus"),
+		Unit:       aws.String("Count"),
+		Value:      aws.Float64(float64(value)),
+		Dimensions: dimensions,
+	})
+}
 
 func (a *instanceCloudwatch) AddMemoryMegabytes(name string, megabytes float64) {
-	a.addMemoryMetric(name, "Megabytes", megabytes);
+	a.addMemoryMetric(name, "Megabytes", megabytes)
 }
-
 
 func (a *instanceCloudwatch) AddMemoryPercent(name string, percent float64) {
-	a.addMemoryMetric(name, "Percent", percent);
+	a.addMemoryMetric(name, "Percent", percent)
 }
 
-
 func (a *instanceCloudwatch) Send() {
+	start := 0
+	len := len(a.metrics)
+	for start < len {
+		end := start + 20
+		if end > len {
+			end = len
+		}
+		a.send(a.metrics[start:end])
+		start = end
+	}
+}
+
+func (a *instanceCloudwatch) send(metrics []*cloudwatch.MetricDatum) {
 	_, err := a.cloudwatch.PutMetricData(&cloudwatch.PutMetricDataInput{
-		MetricData: a.metrics,
+		MetricData: metrics,
 		Namespace:  aws.String(CLOUDWATCH_NAMESPACE),
 	})
 
