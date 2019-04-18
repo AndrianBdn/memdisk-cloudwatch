@@ -2,31 +2,41 @@ package main
 
 import (
 	"flag"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/mem"
 	"log"
-	"os"
-	"time"
 	"math"
 	"math/rand"
+	"os"
+	"time"
+
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/mem"
 )
 
 func main() {
 	crontabPtr := flag.Bool("crontab", false, "run from cron, with random 0..20 delay (by default is off, run as foreground service with 5 min timer)")
 	runoncePtr := flag.Bool("runonce", false, "like 'crontab' but without delay")
+	addcontainer := flag.Bool("addcontainer", false, "add status of containers")
 	flag.Parse()
-
 	runonce := *runoncePtr || *crontabPtr
-
 	if *crontabPtr {
-		time.Sleep(time.Duration(rand.Intn(20)) * time.Second);
+		time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
 	}
 
 	icw := NewInstanceCloudwatch(fsDeviceForMountPath("/"), "/")
-	reportMetricsOnce(icw)
+	reportMetricsOnce(icw, *addcontainer)
 	if !runonce {
-		startFiveMinuteTicker(icw)
+		startFiveMinuteTicker(icw, *addcontainer)
 		select {}
+	}
+}
+
+func reportContainers(icw *instanceCloudwatch) {
+	containers, err := DockerInspect()
+	if err != nil {
+		log.Fatal("Failed to get info of containers:", err)
+	}
+	for _, container := range containers {
+		icw.AddContainerMetric(container.name, container.status)
 	}
 }
 
@@ -71,20 +81,23 @@ func reportDisk(icw *instanceCloudwatch) {
 	//icw.AddDiskPercent("DiskInodesUtilization", du.InodesUsedPercent)
 }
 
-func reportMetricsOnce(icw *instanceCloudwatch) {
+func reportMetricsOnce(icw *instanceCloudwatch, addcontainer bool) {
 	icw.ResetMetrics()
 	reportMemory(icw)
 	reportDisk(icw)
+	if addcontainer {
+		reportContainers(icw)
+	}
 	icw.Send()
 }
 
-func startFiveMinuteTicker(icw *instanceCloudwatch) {
+func startFiveMinuteTicker(icw *instanceCloudwatch, addcontainer bool) {
 	ticker := time.NewTicker(5 * time.Minute)
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				reportMetricsOnce(icw)
+				reportMetricsOnce(icw, addcontainer)
 			}
 		}
 	}()
@@ -108,13 +121,13 @@ func fsDeviceForMountPath(mountPath string) string {
 }
 
 func toMB(bytes uint64) float64 {
-	return float64(bytes / 1048576);
+	return float64(bytes / 1048576)
 	// integer division, only whole megabytes
 	// we don't need half of megabyte in 2016
 }
 
 func toGB(bytes uint64) float64 {
-	gb := toMB(bytes) / 1024.0;
-	return math.Ceil(gb * 100.0) / 100.0;
+	gb := toMB(bytes) / 1024.0
+	return math.Ceil(gb*100.0) / 100.0
 	// only two points after dot
 }

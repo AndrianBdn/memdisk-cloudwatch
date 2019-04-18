@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 )
 
@@ -98,6 +99,18 @@ func TestAddMemoryMetric(t *testing.T) {
 		icw := instanceCloudwatch{}
 		icw.metrics = make([]*cloudwatch.MetricDatum, 0)
 		icw.addMemoryMetric("Name", "Unit", 10)
+
+		if len(icw.metrics) != 1 {
+			t.Fatalf("len(icw.metrics) want:1 got:%v", len(icw.metrics))
+		}
+	})
+}
+
+func TestAddContainerMetric(t *testing.T) {
+	t.Run("AddContainerMetric", func(t *testing.T) {
+		icw := instanceCloudwatch{}
+		icw.metrics = make([]*cloudwatch.MetricDatum, 0)
+		icw.AddContainerMetric("webmain", 1)
 
 		if len(icw.metrics) != 1 {
 			t.Fatalf("len(icw.metrics) want:1 got:%v", len(icw.metrics))
