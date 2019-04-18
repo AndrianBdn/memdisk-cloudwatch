@@ -7,14 +7,14 @@ build:
 	docker run --rm \
 				-v $$(pwd)/binary:/go/bin \
 				-v $$(pwd)/src:/go/src/memdisk-cloudwatch \
-				awsinstancedata-build \
+				memdisk-cloudwatch-build \
 				bash -c "cd /go/src/memdisk-cloudwatch && go install -v"
 
 docker_debug: 
 	docker run --rm -it \
            -v $$(pwd)/binary:/go/bin \
            -v $$(pwd)/src:/go/src/memdisk-cloudwatch \
-           awsinstancedata-build \
+           memdisk-cloudwatch-build \
            bash
 
 release: all 
