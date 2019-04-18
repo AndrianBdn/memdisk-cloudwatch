@@ -26,7 +26,7 @@ const inspectCmd = "docker inspect --format='%s,%s' $(docker ps -aq)"
 const labelFormat = `{{ index .Config.Labels "com.docker.compose.service"}}`
 const statusFormat = "{{ .State.Status }}"
 
-func DockeInspect() ([]container, error) {
+func DockerInspect() ([]container, error) {
 	containers := []container{}
 	cmd := exec.Command("bash", "-c", fmt.Sprintf(inspectCmd, labelFormat, statusFormat))
 	stdout, err := cmd.StdoutPipe()

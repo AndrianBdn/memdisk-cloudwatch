@@ -19,7 +19,7 @@ The program only reports **MemoryUtilization** (percentage) and **DiskSpaceUtili
 
 **DiskSpaceUtilization** is reported only for root volume.
 
-To enable docker container status monitoring **ContainerStatus** use the flag `addcontainer`
+To enable docker-compose container status monitoring (**ContainerStatus**) use the flag `addcontainer`
 
 There is no other configuration. Namespace is `System/Linux`, default metric names and units are the same as
  CloudWatchClient.pm / mon-put-instance-data.pl.

@@ -31,7 +31,7 @@ func main() {
 }
 
 func reportContainers(icw *instanceCloudwatch) {
-	containers, err := DockeInspect()
+	containers, err := DockerInspect()
 	if err != nil {
 		log.Fatal("Failed to get info of containers:", err)
 	}
