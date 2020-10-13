@@ -2,7 +2,9 @@
 
 all: clean build
 
-build:
+build: binary/memdisk-cloudwatch
+
+binary/memdisk-cloudwatch:
 	cd docker-build && docker build -t memdisk-cloudwatch-build .
 	docker run --rm \
 				-v $$(pwd)/binary:/go/bin \
@@ -26,4 +28,12 @@ clean:
 docker-clean:
 	docker rmi memdisk-cloudwatch-build
 
+RPM_SOURCEDIR=$(shell rpm --eval "%{_sourcedir}")
 
+rpm-get-sources: build memdisk-cloudwatch.spec memdisk-cloudwatch.service
+	rpmdev-setuptree
+	cp binary/memdisk-cloudwatch $(RPM_SOURCEDIR)
+	cp memdisk-cloudwatch.service $(RPM_SOURCEDIR)
+
+rpm: memdisk-cloudwatch.spec rpm-get-sources
+	rpmbuild -ba $(RPMBUILD_FLAGS) $<

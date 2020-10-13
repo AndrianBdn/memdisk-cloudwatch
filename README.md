@@ -39,3 +39,17 @@ or this one on Sys-V:
 ```sh
 curl -L https://raw.githubusercontent.com/AndrianBdn/memdisk-cloudwatch/master/install_sysv.sh | sh
 ```
+
+## Building
+
+To generate `binary/memdisk-cloudwatch`:
+
+```sh
+make
+```
+
+To build an RPM (note: this requires the `rpmdevtools` package and depends on `systemd`):
+
+```sh
+make rpm
+```
